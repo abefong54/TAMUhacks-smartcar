@@ -62,16 +62,19 @@ def vehicle():
     kilometers = odometer['data']['distance']
     mileage = kilometers * 0.62137
     save_mileage_to_db(mileage)
-
+    save_car_name_to_db(carName)
 
     values ={
             'name':carName,
             'currentmileage':mileage,
             'oldmileage':get_old_mileage(),
             'needs_oil_change': True if (mileage - get_old_mileage() > miles_until_oil_change) else False,
-        }
+    }
 
-    return jsonify(values)#
+    with open('data.json') as f:
+        data = json.load(f)
+
+    return jsonify(values, data)#
     pass
 
 
@@ -80,11 +83,7 @@ def save_mileage_to_db(mileage):
     with open('data.json') as f:
         data = json.load(f)
         oldMiles= int(data["old_mileage"])
-
         if oldMiles < mileage:
-            if(oldMiles - miles_until_oil_change):
-                print("NEED OIL CHANGE!")
-
             data["old_mileage"] = str(mileage)
 
             print("mileage updated")
@@ -93,6 +92,15 @@ def get_old_mileage():
     with open('data.json') as f:
         data = json.load(f)
         return int(data["old_mileage"])
+
+def save_car_name_to_db(name):
+    print("saving", name, "to db")
+    with open('data.json') as f:
+        data = json.load(f)
+        print("old name: ", data["car_name"])
+        data["car_name"] = str(name)
+
+
 
 
 if __name__ == '__main__':
